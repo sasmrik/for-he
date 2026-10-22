@@ -720,182 +720,362 @@
     </section>
   </main>
 
-  <script>
-   // Вставь данные своего Telegram-бота.
-let BOT_TOKEN = "8722988789:AAHBFyaS5uF8xrS077mdfyTs6fO6xeD0nRo";
-let CHAT_ID = "5257725677";
+ <script>
+  // Отзовите ранее опубликованный токен и вставьте новый.
+  // Токен в HTML доступен всем, кто может открыть страницу.
+  const BOT_TOKEN = "8722988789:AAHbFyaS5uF8xrS077mdfyTs6fo6xeD0nRo";
+  const CHAT_ID = "5257725677";
 
-const screens = {
-    invite: document.querySelector("#screenInvite"),
-    date: document.querySelector("#screendate") || document.querySelector("#screenDate"),
-    letter: document.querySelector("#screenLetter"),
-    final: document.querySelector("#screenFinal")
-};
+  const screens = {
+    invite: document.getElementById("screenInvite"),
+    date: document.getElementById("screenDate") ||
+          document.getElementById("screendate"),
+    letter: document.getElementById("screenLetter"),
+    final: document.getElementById("screenFinal")
+  };
 
-const fireworksLayer = document.querySelector("#fireworks");
-const dateButton = document.querySelector("#yesButton");
-const agreeButton = document.querySelector("#agreeButton");
-const anticipation = document.querySelector("#anticipation");
-const noButton = document.querySelector("#noButton");
-const noMessage = document.querySelector("#noMessage");
+  const fireworksContainer = document.getElementById("fireworks");
+  const agreeButton = document.getElementById("agreeButton");
 
-let dateSelected = false;
-let selectedTime = null;
-let letterTimer;
+  let dateSelected = false;
+  let selectedDate = "";
+  let selectedTime = "";
+  let finalScreenTimer = null;
+  let noMessageTimer = null;
 
-function showScreen(screen) {
-    Object.values(screens).forEach(item => {
-        if (item) item.classList.toggle("active", item === screen);
-    });
-}
-
-// 1. Клик по первой кнопке "Да ♡" (Запускает припев и салют)
-if (dateButton) {
-    dateButton.addEventListener("click", () => {
-        // Включаем Челентано
-        const audio = document.querySelector("#bgMusic");
-        if (audio) {
-            audio.volume = 0.4; // Комфортная громкость
-            audio.currentTime = 110; // Перемотка на припев (1:50)
-            audio.play().catch(e => console.log("Браузер заблокировал звук:", e));
-        }
-
-        // Включаем салют
-        if (typeof moveFireworks === "function") moveFireworks();
-        
-        // Открываем экран выбора даты
-        showScreen(screens.date);
-    });
-}
-
-// 2. Функция отправки сообщения в Telegram
-function sendTelegramMessage(text) {
-    const url = `https://telegram.org{BOT_TOKEN}/sendMessage`;
-    
-    fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            chat_id: CHAT_ID,
-            text: text
-        })
-    })
-    .then(response => console.log("Отправлено в TG:", response.ok))
-    .catch(error => console.error("Ошибка отправки в TG:", error));
-}
-// 2. Функция отправки сообщения в Telegram
-function sendTelegramMessage(text) {
-    // Вставляем адрес и твои ID напрямую, чтобы кавычки не путались
-    const url = "https://telegram.org";
-    
-    fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            chat_id: "5257725677",
-            text: text
-        })
-    })
-    .then(response => console.log("Отправлено в TG:", response.ok))
-    .catch(error => console.error("Ошибка отправки в TG:", error));
-}
-
-// 3. Функция, которая создает кнопки времени сразу
-function generateTimeButtons() {
-    const dayTimes = document.querySelector("#dayTimes");
-    const eveningTimes = document.querySelector("#eveningTimes");
-    
-    if (dayTimes && eveningTimes) {
-        dayTimes.innerHTML = `
-            <button class="time-button">12:00</button>
-            <button class="time-button">14:00</button>
-            <button class="time-button">16:00</button>
-        `;
-        eveningTimes.innerHTML = `
-            <button class="time-button">18:00</button>
-            <button class="time-button">20:00</button>
-            <button class="time-button">22:00</button>
-        `;
-        
-        dayTimes.style.display = "block";
-        eveningTimes.style.display = "block";
-        
-        document.querySelectorAll(".time-button").forEach(timeBtn => {
-            timeBtn.addEventListener("click", (event) => {
-                document.querySelectorAll(".time-button").forEach(b => b.classList.remove("selected"));
-                event.currentTarget.classList.add("selected");
-                selectedTime = event.currentTarget.textContent;
-                
-                const agreeBtn = document.querySelector("#agreeButton");
-                if (agreeBtn) agreeBtn.removeAttribute("disabled");
-            });
-        });
+  function showScreen(screenToShow) {
+    if (!screenToShow) {
+      console.error("Экран не найден. Проверьте ID экранов в HTML.");
+      return;
     }
-}
 
-// Запускаем создание кнопок времени сразу при старте скрипта
-generateTimeButtons();
+    Object.values(screens).forEach((screen) => {
+      if (!screen) return;
 
-// Логика выбора дня (просто подсвечивает число)
-document.querySelectorAll(".date-button").forEach(button => {
-    button.addEventListener("click", (e) => {
-        document.querySelectorAll(".date-button").forEach(b => b.classList.remove("selected"));
-        e.currentTarget.classList.add("selected");
-        dateSelected = true;
+      const isActive = screen === screenToShow;
+      screen.hidden = !isActive;
+      screen.style.display = isActive ? "" : "none";
+      screen.classList.toggle("active", isActive);
+      screen.setAttribute("aria-hidden", String(!isActive));
     });
-});
+  }
 
-// Выбор конкретного часа
-document.querySelectorAll(".time-button").forEach(button => {
-    button.addEventListener("click", (e) => {
-        document.querySelectorAll(".time-button").forEach(b => b.classList.remove("selected"));
-        e.currentTarget.classList.add("selected");
-        selectedTime = e.currentTarget.textContent;
-    });
-});
+  // При загрузке отображается только экран приглашения.
+  Object.values(screens).forEach((screen) => {
+    if (!screen) return;
 
-// 3. Клик по второй кнопке "Договорились" (Отправляет время в бот)
-if (agreeButton) {
-    agreeButton.addEventListener("click", () => {
-        showScreen(screens.letter);
-        
-        // Отправка уведомления
-        sendTelegramMessage("❤️ Она согласилась на свидание! Время: $");
+    screen.hidden = true;
+    screen.style.display = "none";
+    screen.classList.remove("active");
+    screen.setAttribute("aria-hidden", "true");
+  });
 
-        window.clearTimeout(letterTimer);
-        letterTimer = window.setTimeout(() => {
-            showScreen(screens.final);
-        }, 2500);
-    });
-}
+  if (screens.invite) {
+    screens.invite.hidden = false;
+    screens.invite.style.display = "";
+    screens.invite.classList.add("active");
+    screens.invite.setAttribute("aria-hidden", "false");
+  }
 
-// 4. Клик по кнопке "Повторить"
-const replayButton = document.querySelector("#replayButton");
-if (replayButton) {
-    replayButton.addEventListener("click", () => {
-        showScreen(screens.invite);
-        dateSelected = false;
-        selectedTime = null;
-        
-        // Выключаем музыку при сбросе
-        const audio = document.querySelector("#bgMusic");
-        if (audio) {
-            audio.pause();
-            audio.currentTime = 110;
+  function createFirework(event) {
+    if (!fireworksContainer) return;
+
+    const button = event.currentTarget;
+    if (button && button.disabled) return;
+
+    const rect = button ? button.getBoundingClientRect() : null;
+    const x = Number.isFinite(event.clientX) && event.clientX !== 0
+      ? event.clientX
+      : rect
+        ? rect.left + rect.width / 2
+        : window.innerWidth / 2;
+    const y = Number.isFinite(event.clientY) && event.clientY !== 0
+      ? event.clientY
+      : rect
+        ? rect.top + rect.height / 2
+        : window.innerHeight / 2;
+
+    const colors = [
+      "#ff78b7", "#ffd95e", "#a78bfa",
+      "#8be9fd", "#ffffff", "#ff9e7a"
+    ];
+
+    for (let i = 0; i < 15; i++) {
+      const particle = document.createElement("div");
+      const angle = Math.PI * 2 * i / 15;
+      const distance = 35 + Math.random() * 45;
+      const size = 5 + Math.random() * 5;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      particle.style.cssText = `
+        position: fixed;
+        z-index: 10000;
+        left: ${x}px;
+        top: ${y}px;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: 50%;
+        pointer-events: none;
+        background: ${color};
+        box-shadow: 0 0 10px 2px ${color};
+        animation: invite-firework-explode .5s ease-out forwards;
+      `;
+      particle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+      particle.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+
+      fireworksContainer.appendChild(particle);
+      window.setTimeout(() => particle.remove(), 550);
+    }
+  }
+
+  if (!document.getElementById("inviteFireworkStyles")) {
+    const style = document.createElement("style");
+    style.id = "inviteFireworkStyles";
+    style.textContent = `
+      @keyframes invite-firework-explode {
+        to {
+          transform: translate(var(--dx), var(--dy)) scale(.12);
+          opacity: 0;
         }
-    });
-}
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-// 5. Поведение кнопки "Нет" (Беглянка)
-if (noButton) {
-    noButton.addEventListener("mouseenter", () => {
-        const x = Math.random() * (window.innerWidth - noButton.offsetWidth);
-        const y = Math.random() * (window.innerHeight - noButton.offsetHeight);
-        noButton.style.position = "absolute";
-        noButton.style.left = `${x}px`;
-        noButton.style.top = `${y}px`;
+  // Салют срабатывает на активных кнопках приглашения.
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest(
+      "#yesButton, .date-button, .time-button, #agreeButton, #replayButton"
+    );
+
+    if (!button || button.disabled || !fireworksContainer) return;
+
+    fireworksContainer.classList.add("active");
+    fireworksContainer.style.display = "block";
+
+    createFirework({
+      currentTarget: button,
+      clientX: event.clientX,
+      clientY: event.clientY
     });
-}
-  </script>
+  });
+
+  function updateAgreeButton() {
+    if (agreeButton) {
+      agreeButton.disabled = !(dateSelected && selectedTime);
+    }
+  }
+
+  function generateTimeButtons() {
+    const dayTimes = document.getElementById("dayTimes");
+    const eveningTimes = document.getElementById("eveningTimes");
+
+    if (!dayTimes || !eveningTimes) {
+      console.error("Не найдены контейнеры #dayTimes и/или #eveningTimes.");
+      return;
+    }
+
+    dayTimes.innerHTML = ["12:00", "14:00", "16:00"]
+      .map((time) =>
+        `<button type="button" class="time-button">${time}</button>`
+      )
+      .join("");
+
+    eveningTimes.innerHTML = ["18:00", "20:00", "22:00"]
+      .map((time) =>
+        `<button type="button" class="time-button">${time}</button>`
+      )
+      .join("");
+
+    dayTimes.style.display = "block";
+    eveningTimes.style.display = "block";
+
+    document.querySelectorAll(".time-button").forEach((button) => {
+      button.setAttribute("aria-pressed", "false");
+
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".time-button").forEach((item) => {
+          item.classList.remove("selected");
+          item.setAttribute("aria-pressed", "false");
+        });
+
+        button.classList.add("selected");
+        button.setAttribute("aria-pressed", "true");
+        selectedTime = button.textContent.trim();
+        updateAgreeButton();
+      });
+    });
+  }
+
+  // Создаём кнопки времени сразу, при выполнении скрипта.
+  generateTimeButtons();
+
+  document.querySelectorAll(".date-button:not(:disabled)").forEach((button) => {
+    button.setAttribute("aria-pressed", "false");
+
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".date-button").forEach((item) => {
+        item.classList.remove("selected");
+        item.setAttribute("aria-pressed", "false");
+      });
+
+      button.classList.add("selected");
+      button.setAttribute("aria-pressed", "true");
+      dateSelected = true;
+      selectedDate =
+        button.dataset.longDate ||
+        button.dataset.date ||
+        button.textContent.trim();
+
+      updateAgreeButton();
+    });
+  });
+
+  document.getElementById("yesButton")?.addEventListener("click", () => {
+    const audio = document.getElementById("bgMusic");
+
+    if (audio) {
+      audio.volume = 0.4;
+
+      const seekAndPlay = () => {
+        try {
+          audio.currentTime = 110;
+        } catch (error) {
+          console.warn("Не удалось перемотать аудио:", error);
+        }
+
+        audio.play().catch((error) => {
+          console.warn("Браузер не разрешил воспроизведение аудио:", error);
+        });
+      };
+
+      if (audio.readyState >= 1) {
+        seekAndPlay();
+      } else {
+        audio.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+        audio.load();
+      }
+    }
+
+    if (fireworksContainer) {
+      fireworksContainer.classList.add("active");
+      fireworksContainer.style.display = "block";
+    }
+
+    showScreen(screens.date);
+  });
+
+  async function sendTelegramMessage(text) {
+    if (
+      !BOT_TOKEN ||
+      BOT_TOKEN === "ВСТАВЬТЕ_НОВЫЙ_ТОКЕН" ||
+      !CHAT_ID ||
+      CHAT_ID === "ВСТАВЬТЕ_CHAT_ID"
+    ) {
+      console.error("Укажите новый BOT_TOKEN и CHAT_ID в начале скрипта.");
+      return false;
+    }
+
+    const url = new URL(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`
+    );
+    url.searchParams.set("chat_id", CHAT_ID);
+    url.searchParams.set("text", text);
+
+    try {
+      await fetch(url.toString(), {
+        method: "GET",
+        mode: "no-cors"
+      });
+
+      // Это означает, что браузер не обнаружил сетевой сбой.
+      // Ответ Telegram в режиме no-cors прочитать нельзя.
+      return true;
+    } catch (error) {
+      console.error("Ошибка отправки запроса в Telegram:", error);
+      return false;
+    }
+  }
+
+  agreeButton?.addEventListener("click", () => {
+    if (!dateSelected || !selectedTime) {
+      console.warn("Сначала выберите дату и время.");
+      return;
+    }
+
+    const message =
+      "❤️ Ярослав, она согласилась! Время свидания: " +
+      selectedTime;
+
+    if (selectedDate) {
+      void sendTelegramMessage(`${message}. Дата: ${selectedDate}.`);
+    } else {
+      void sendTelegramMessage(message);
+    }
+
+    showScreen(screens.letter);
+
+    window.clearTimeout(finalScreenTimer);
+    finalScreenTimer = window.setTimeout(() => {
+      showScreen(screens.final);
+    }, 2500);
+  });
+
+  const noButton = document.getElementById("noButton");
+
+  noButton?.addEventListener("mouseenter", () => {
+    const margin = 12;
+    const maxX = Math.max(
+      margin,
+      window.innerWidth - noButton.offsetWidth - margin
+    );
+    const maxY = Math.max(
+      margin,
+      window.innerHeight - noButton.offsetHeight - margin
+    );
+
+    noButton.style.position = "fixed";
+    noButton.style.zIndex = "10001";
+    noButton.style.left =
+      `${margin + Math.random() * (maxX - margin)}px`;
+    noButton.style.top =
+      `${margin + Math.random() * (maxY - margin)}px`;
+  });
+
+  document.getElementById("replayButton")?.addEventListener("click", () => {
+    window.clearTimeout(finalScreenTimer);
+    window.clearTimeout(noMessageTimer);
+
+    dateSelected = false;
+    selectedDate = "";
+    selectedTime = "";
+
+    document.querySelectorAll(".date-button, .time-button").forEach((button) => {
+      button.classList.remove("selected");
+      button.setAttribute("aria-pressed", "false");
+    });
+
+    updateAgreeButton();
+
+    const audio = document.getElementById("bgMusic");
+    if (audio) {
+      audio.pause();
+      try {
+        audio.currentTime = 0;
+      } catch (error) {
+        console.warn("Не удалось сбросить позицию аудио:", error);
+      }
+    }
+
+    if (noButton) {
+      noButton.style.position = "";
+      noButton.style.left = "";
+      noButton.style.top = "";
+      noButton.style.zIndex = "";
+    }
+
+    showScreen(screens.invite);
+  });
+</script>
 </body>
 </html>
