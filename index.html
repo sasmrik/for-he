@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#211431">
+  <title>Приглашение на свидание от Ярослава</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #211431;
+      --pink: #ff78b7;
+      --pink-light: #ffc2dd;
+      --cream: #fff5e9;
+      --muted: #d3c6df;
+      --panel: rgba(255, 255, 255, .08);
+      --line: rgba(255, 255, 255, .15);
+      --font: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--cream);
+      background:
+        radial-gradient(ellipse at 50% 25%, #482864 0, transparent 52%),
+        linear-gradient(145deg, #1a122b, #2c1b43 58%, #201532);
+      font-family: var(--font);
+    }
+
+    button { font: inherit; }
+
+    .background-hearts, .fireworks {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .background-hearts { z-index: 0; }
+    .fireworks { z-index: 10; }
+
+    .background-hearts span {
+      position: absolute;
+      bottom: -48px;
+      color: rgba(255, 120, 183, .3);
+      animation: float-up linear infinite;
+      user-select: none;
+    }
+
+    .background-hearts span:nth-child(1) { left: 7%; font-size: 22px; animation-duration: 14s; }
+    .background-hearts span:nth-child(2) { left: 23%; font-size: 15px; animation-duration: 18s; animation-delay: 3s; }
+    .background-hearts span:nth-child(3) { left: 44%; font-size: 27px; animation-duration: 16s; animation-delay: 6s; }
+    .background-hearts span:nth-child(4) { left: 68%; font-size: 19px; animation-duration: 20s; animation-delay: 2s; }
+    .background-hearts span:nth-child(5) { left: 86%; font-size: 25px; animation-duration: 15s; animation-delay: 5s; }
+    .background-hearts span:nth-child(6) { left: 95%; font-size: 14px; animation-duration: 17s; animation-delay: 9s; }
+
+    @keyframes float-up {
+      0% { transform: translateY(0) rotate(0); opacity: 0; }
+      12% { opacity: .75; }
+      88% { opacity: .65; }
+      100% { transform: translateY(-115vh) rotate(28deg); opacity: 0; }
+    }
+
+    .stage { position: relative; z-index: 1; min-height: 100svh; }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      min-height: 100svh;
+      padding: 26px 16px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(12px) scale(.99);
+      transition: opacity .45s ease, transform .45s ease, visibility .45s ease;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    .content {
+      width: min(100%, 650px);
+      margin: auto;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 17px;
+      color: var(--pink-light);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      line-height: 1.6;
+    }
+
+    h1, h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      letter-spacing: -.035em;
+    }
+
+    h1 {
+      margin: 12px 0;
+      font-size: clamp(2.25rem, 9vw, 4.15rem);
+      line-height: 1.05;
+    }
+
+    h2 {
+      margin: 8px 0 10px;
+      font-size: clamp(2rem, 7vw, 3.1rem);
+      line-height: 1.08;
+    }
+
+    .description {
+      max-width: 470px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    .cat {
+      display: block;
+      width: min(235px, 62vw);
+      height: auto;
+      margin: 0 auto 18px;
+      overflow: visible;
+      filter: drop-shadow(0 18px 32px rgba(0, 0, 0, .25));
+    }
+
+    .cat-sway {
+      transform-origin: 50% 85%;
+      animation: cat-sway 3s ease-in-out infinite;
+    }
+
+    .blink {
+      transform-origin: center;
+      animation: blink 4.7s infinite;
+    }
+
+    .heart-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes cat-sway {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-7px) rotate(1deg); }
+    }
+
+    @keyframes blink {
+      0%, 43%, 47%, 100% { transform: scaleY(1); }
+      45% { transform: scaleY(.1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .button {
+      min-height: 52px;
+      padding: 13px 24px;
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    }
+
+    .button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .button:active:not(:disabled) { transform: scale(.98); }
+
+    .button:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .button-yes {
+      min-width: 150px;
+      color: #4b1d39;
+      background: linear-gradient(135deg, #ffadd0, #ff69aa);
+      box-shadow: 0 9px 30px rgba(255, 105, 170, .3);
+      font-size: 1.08rem;
+    }
+
+    .button-no {
+      position: relative;
+      min-width: 90px;
+      color: #f2edf6;
+      background: rgba(255, 255, 255, .13);
+      border: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    .no-message {
+      min-height: 1.6em;
+      margin: 12px 0 0;
+      color: var(--pink-light);
+      font-size: .9rem;
+    }
+
+    .decline-link {
+      display: inline-block;
+      margin-top: 7px;
+      padding: 6px 9px;
+      border: 0;
+      color: rgba(255,255,255,.68);
+      background: transparent;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .date-content {
+      width: min(100%, 760px);
+      margin: auto;
+      text-align: center;
+    }
+
+    .date-content .description { margin-bottom: 22px; }
+
+    .picker-block { margin-top: 20px; text-align: left; }
+
+    .picker-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--pink-light);
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+    }
+
+    .picker-label::after {
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+      content: "";
+    }
+
+    .date-options {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding: 3px 2px 10px;
+      scrollbar-color: rgba(255,120,183,.45) transparent;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .date-button, .time-button {
+      color: var(--cream);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .18s ease, border-color .18s ease, transform .18s ease;
+      touch-action: manipulation;
+    }
+
+    .date-button {
+      min-width: 88px;
+      min-height: 72px;
+      padding: 9px;
+      border-radius: 19px;
+      text-align: center;
+    }
+
+    .day-name {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: .69rem;
+    }
+
+    .day-date {
+      display: block;
+      font-size: .82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .date-button.selected, .time-button.selected {
+      border-color: var(--pink);
+      background: rgba(255,120,183,.2);
+      box-shadow: inset 0 0 0 1px rgba(255,120,183,.18);
+    }
+
+    .date-button:disabled {
+      color: #a49aad;
+      background: rgba(255,255,255,.035);
+      border-color: rgba(255,255,255,.08);
+      opacity: .43;
+      cursor: not-allowed;
+    }
+
+    .time-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .time-button {
+      min-height: 47px;
+      border-radius: 15px;
+      font-weight: 800;
+    }
+
+    .time-button:hover:not(:disabled), .date-button:hover:not(:disabled) {
+      border-color: rgba(255,194,221,.7);
+      background: rgba(255,255,255,.13);
+    }
+
+    .anticipation {
+      min-height: 1.8em;
+      margin: 17px 0 -8px;
+      color: var(--pink-light);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1rem, 4vw, 1.28rem);
+      font-style: italic;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity .3s ease, transform .3s ease;
+    }
+
+    .anticipation.visible { opacity: 1; transform: translateY(0); }
+
+    .agree-button {
+      min-width: min(100%, 280px);
+      margin-top: 18px;
+    }
+
+    .button:disabled {
+      cursor: not-allowed;
+      opacity: .43;
+      filter: grayscale(.25);
+      box-shadow: none;
+    }
+
+    .letter-content { display: grid; justify-items: center; gap: 16px; }
+
+    .mail-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: min(330px, 85vw);
+      height: 230px;
+      perspective: 800px;
+    }
+
+    .envelope {
+      position: relative;
+      width: 205px;
+      height: 132px;
+      border-radius: 9px;
+      background: #ff82b8;
+      box-shadow: 0 0 28px rgba(255,120,183,.5), 0 22px 55px rgba(0,0,0,.28);
+      animation: envelope-rise 2.5s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+
+    .envelope-back {
+      position: absolute;
+      inset: 0;
+      border-radius: 9px;
+      background: #ffb4d4;
+    }
+
+    .letter {
+      position: absolute;
+      z-index: 1;
+      left: 15px;
+      bottom: 8px;
+      width: 175px;
+      height: 108px;
+      border-radius: 7px;
+      background: #fff8f2;
+      box-shadow: 0 0 24px rgba(255,255,255,.45);
+      animation: letter-fly 2.1s .45s cubic-bezier(.2,.7,.2,1) forwards;
+    }
+
+    .letter::before, .letter::after {
+      position: absolute;
+      left: 25px;
+      right: 25px;
+      height: 3px;
+      border-radius: 3px;
+      background: #f4bfd6;
+      content: "";
+    }
+
+    .letter::before { top: 32px; }
+    .letter::after { top: 45px; right: 47px; }
+
+    .envelope-front {
+      position: absolute;
+      z-index: 3;
+      inset: 0;
+      border-radius: 9px;
+      background: #f982b5;
+      clip-path: polygon(0 31%, 50% 70%, 100% 31%, 100% 100%, 0 100%);
+    }
+
+    .envelope-flap {
+      position: absolute;
+      z-index: 4;
+      inset: 0;
+      border-radius: 9px;
+      background: #ffc2dd;
+      clip-path: polygon(0 0, 100% 0, 50% 65%);
+      transform-origin: 50% 0;
+      animation: flap-open .65s .4s ease-in forwards;
+    }
+
+    .envelope-heart {
+      position: absolute;
+      z-index: 5;
+      top: 51px;
+      left: 50%;
+      color: white;
+      font-size: 30px;
+      transform: translateX(-50%);
+      animation: heart-away .4s .4s ease forwards;
+    }
+
+    @keyframes envelope-rise {
+      0% { transform: translateY(30px) scale(.84); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(-16px) scale(1); opacity: 1; }
+    }
+
+    @keyframes flap-open { to { transform: rotateX(180deg); opacity: .75; } }
+
+    @keyframes letter-fly {
+      0% { transform: translateY(0) rotate(0); }
+      45% { transform: translateY(-75px) rotate(-4deg); }
+      100% { transform: translateY(-300px) rotate(8deg); opacity: 0; }
+    }
+
+    @keyframes heart-away {
+      to { opacity: 0; transform: translate(-50%, -12px) scale(.7); }
+    }
+
+    .letter-title {
+      max-width: 550px;
+      margin: 0;
+      font: 500 clamp(1.8rem, 7vw, 3rem)/1.15 Georgia, "Times New Roman", serif;
+    }
+
+    .letter-caption {
+      margin: -8px 0 0;
+      color: var(--pink-light);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .17em;
+    }
+
+    .final-cat { width: min(195px, 52vw); margin-bottom: 7px; }
+
+    .final-title {
+      margin: 0 0 18px;
+      font: 500 clamp(1.9rem, 7vw, 3.1rem)/1.12 Georgia, "Times New Roman", serif;
+    }
+
+    .date-ticket {
+      display: inline-block;
+      margin: 0 auto 18px;
+      padding: 13px 18px;
+      border: 1px solid rgba(255,194,221,.38);
+      border-radius: 18px;
+      color: #ffe8f2;
+      background: rgba(255,120,183,.14);
+      box-shadow: 0 0 24px rgba(255,120,183,.14);
+      font-size: clamp(.9rem, 3.7vw, 1.08rem);
+      font-weight: 800;
+    }
+
+    .signature {
+      margin: 17px 0 0;
+      color: var(--pink-light);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.25rem;
+      font-style: italic;
+    }
+
+    .particle {
+      position: fixed;
+      left: var(--x);
+      top: var(--y);
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: var(--color);
+      box-shadow: 0 0 10px 2px var(--color);
+      animation: explode .5s ease-out forwards;
+    }
+
+    @keyframes explode {
+      to {
+        transform: translate(var(--dx), var(--dy)) scale(.12);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .screen { padding: 21px 14px; }
+      .picker-block { margin-top: 16px; }
+      .date-button { min-width: 82px; }
+      .button-row { gap: 9px; }
+      .button-yes { min-width: 135px; }
+      .button-no { min-width: 78px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+  <div class="background-hearts" aria-hidden="true">
+    <span>♡</span><span>♥</span><span>♡</span>
+    <span>♥</span><span>♡</span><span>♥</span>
+  </div>
+  <div class="fireworks" id="fireworks" aria-hidden="true"></div>
+
+  <main class="stage">
+    <!-- Экран 1 -->
+    <section class="screen active" id="screenInvite" aria-labelledby="inviteTitle">
+      <div class="content">
+        <p class="eyebrow">У МЕНЯ К ТЕБЕ СЕРЬЁЗНЫЙ ВОПРОС</p>
+
+        <svg class="cat" viewBox="0 0 240 230" role="img" aria-label="Милая кошка с сердечком">
+          <g class="cat-sway">
+            <!-- Уши и внутренняя часть ушек -->
+            <path d="M48 80 43 25q-1-12 11-5l43 39M192 80l5-55q1-12-11-5l-43 39"
+                  fill="#ffd95e" stroke="#edb844" stroke-width="5" stroke-linejoin="round"/>
+            <path d="m58 51-3-19 26 21M182 51l3-19-26 21" fill="#ff9fbd"/>
+            <!-- Голова -->
+            <path d="M43 84q0-55 77-55t77 55v61q0 58-77 58t-77-58Z"
+                  fill="#ffd95e" stroke="#edb844" stroke-width="5"/>
+            <!-- Блики на шерсти -->
+            <path d="M65 66q9-16 23-20M175 66q-9-16-23-20"
+                  fill="none" stroke="#fff0ad" stroke-width="6" stroke-linecap="round"/>
+            <!-- Большие аниме-глаза -->
+            <g class="blink">
+              <ellipse cx="88" cy="105" rx="13" ry="17" fill="#51364d"/>
+              <ellipse cx="152" cy="105" rx="13" ry="17" fill="#51364d"/>
+              <ellipse cx="92" cy="99" rx="4.7" ry="6.5" fill="#fff"/>
+              <ellipse cx="156" cy="99" rx="4.7" ry="6.5" fill="#fff"/>
+              <circle cx="83" cy="111" r="2.5" fill="#ffb3d0"/>
+              <circle cx="147" cy="111" r="2.5" fill="#ffb3d0"/>
+            </g>
+            <!-- Щёчки, нос и улыбка -->
+            <ellipse cx="68" cy="128" rx="13" ry="7" fill="#ff91ac" opacity=".78"/>
+            <ellipse cx="172" cy="128" rx="13" ry="7" fill="#ff91ac" opacity=".78"/>
+            <path d="M114 121q6-6 12 0-6 8-12 0Z" fill="#d96589"/>
+            <path d="M120 129q-8 12-16 2M120 129q8 12 16 2"
+                  fill="none" stroke="#684357" stroke-width="3" stroke-linecap="round"/>
+            <!-- Усы -->
+            <path d="m57 125-27-5m27 14-28 4m154-13 27-5m-27 14 28 4"
+                  fill="none" stroke="#9c7543" stroke-width="3" stroke-linecap="round"/>
+            <!-- Лапки и бьющееся сердце -->
+            <path d="M72 165q13-16 29 0M139 165q16-16 29 0"
+                  fill="none" stroke="#f2b93e" stroke-width="14" stroke-linecap="round"/>
+            <path class="heart-pulse"
+                  d="M120 143c-11-13-29 5 0 29 29-24 11-42 0-29Z"
+                  fill="#ff72ad" stroke="#fff0f6" stroke-width="2"/>
+          </g>
+        </svg>
+
+        <h1 id="inviteTitle">Пойдёшь со мной на свидание? 🥺</h1>
+        <p class="description">
+          Обещаю вкусный вечер, тёплый свет и ни одной неловкой паузы.
+          Кошка, кстати, тоже за.
+        </p>
+
+        <div class="button-row">
+          <button class="button button-yes firework" id="yesButton" type="button">Да ♡</button>
+          <button class="button button-no" id="noButton" type="button">Нет</button>
+        </div>
+
+        <p class="no-message" id="noMessage" aria-live="polite"></p>
+        <button class="decline-link" id="declineButton" type="button"></button>
+      </div>
+    </section>
+
+    <!-- Экран 2 -->
+    <section class="screen" id="screenDate" aria-labelledby="dateTitle">
+      <div class="date-content">
+        <p class="eyebrow">ТЫ СКАЗАЛА «ДА» — ТЕПЕРЬ ГЛАВНОЕ</p>
+        <h2 id="dateTitle">Выбери день и час</h2>
+        <p class="description">Ближайшая неделя в твоём распоряжении. Я подстроюсь.</p>
+
+        <div class="picker-block">
+          <div class="picker-label">ДЕНЬ</div>
+          <div class="date-options" aria-label="Даты октября 2026">
+            <button class="date-button" type="button" disabled>
+              <span class="day-name">Пт</span><span class="day-date">23 окт</span>
+            </button>
+            <button class="date-button" type="button" disabled>
+              <span class="day-name">Сб</span><span class="day-date">24 окт</span>
+            </button>
+            <button class="date-button firework" id="date25" type="button"
+                    aria-pressed="false" aria-label="Выбрать воскресенье, 25 октября">
+              <span class="day-name">Вс</span><span class="day-date">25 окт</span>
+            </button>
+            <button class="date-button" type="button" disabled>
+              <span class="day-name">Пн</span><span class="day-date">26 окт</span>
+            </button>
+            <button class="date-button" type="button" disabled>
+              <span class="day-name">Вт</span><span class="day-date">27 окт</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="picker-block">
+          <div class="picker-label">ДНЁМ</div>
+          <div class="time-options" id="dayTimes"></div>
+        </div>
+
+        <div class="picker-block">
+          <div class="picker-label">ВЕЧЕРОМ</div>
+          <div class="time-options" id="eveningTimes"></div>
+        </div>
+
+        <p class="anticipation" id="anticipation" aria-live="polite"></p>
+        <button class="button button-yes agree-button firework" id="agreeButton"
+                type="button" disabled>
+          Договорились ♡
+        </button>
+      </div>
+    </section>
+
+    <!-- Экран 3 -->
+    <section class="screen" id="screenLetter" aria-live="polite">
+      <div class="content letter-content">
+        <div class="mail-stage" aria-hidden="true">
+          <div class="envelope">
+            <div class="envelope-back"></div>
+            <div class="letter"></div>
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-heart">♡</div>
+          </div>
+        </div>
+        <h2 class="letter-title">Я передал Ярославу, спасибо ♡.</h2>
+        <p class="letter-caption">ПИСЬМО УЖЕ В ПУТИ</p>
+      </div>
+    </section>
+
+    <!-- Экран 4 -->
+    <section class="screen" id="screenFinal" aria-labelledby="finalTitle">
+      <div class="content">
+        <svg class="cat final-cat" viewBox="0 0 240 230" role="img" aria-label="Довольная мурчащая кошка">
+          <g class="cat-sway">
+            <path d="M48 80 43 25q-1-12 11-5l43 39M192 80l5-55q1-12-11-5l-43 39"
+                  fill="#ffd95e" stroke="#edb844" stroke-width="5" stroke-linejoin="round"/>
+            <path d="m58 51-3-19 26 21M182 51l3-19-26 21" fill="#ff9fbd"/>
+            <path d="M43 84q0-55 77-55t77 55v61q0 58-77 58t-77-58Z"
+                  fill="#ffd95e" stroke="#edb844" stroke-width="5"/>
+            <path d="M76 105q12 16 24 0M140 105q12 16 24 0"
+                  fill="none" stroke="#51364d" stroke-width="5" stroke-linecap="round"/>
+            <ellipse cx="68" cy="128" rx="13" ry="7" fill="#ff91ac" opacity=".78"/>
+            <ellipse cx="172" cy="128" rx="13" ry="7" fill="#ff91ac" opacity=".78"/>
+            <path d="M114 121q6-6 12 0-6 8-12 0Z" fill="#d96589"/>
+            <path d="M120 129q-8 12-16 2M120 129q8 12 16 2"
+                  fill="none" stroke="#684357" stroke-width="3" stroke-linecap="round"/>
+            <path d="m57 125-27-5m27 14-28 4m154-13 27-5m-27 14 28 4"
+                  fill="none" stroke="#9c7543" stroke-width="3" stroke-linecap="round"/>
+            <path d="M72 165q13-16 29 0M139 165q16-16 29 0"
+                  fill="none" stroke="#f2b93e" stroke-width="14" stroke-linecap="round"/>
+            <path class="heart-pulse" d="M120 143c-11-13-29 5 0 29 29-24 11-42 0-29Z"
+                  fill="#ff72ad" stroke="#fff0f6" stroke-width="2"/>
+          </g>
+        </svg>
+
+        <h2 class="final-title" id="finalTitle">ВСЁ, ДОГОВОРИЛИСЬ. До встречи!</h2>
+        <div class="date-ticket" id="finalDate"></div>
+        <p class="description">
+          Буду ждать и немножко волноваться. Надень то, в чём тебе хорошо —
+          остальное я беру на себя.
+        </p>
+        <p class="signature">— Ярослав</p>
+        <button class="decline-link firework" id="replayButton" type="button">
+          Ещё раз посмотреть
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+   // Вставь данные своего Telegram-бота.
+let BOT_TOKEN = "8722988789:AAHBFyaS5uF8xrS077mdfyTs6fO6xeD0nRo";
+let CHAT_ID = "5257725677";
+
+const screens = {
+    invite: document.querySelector("#screenInvite"),
+    date: document.querySelector("#screendate") || document.querySelector("#screenDate"),
+    letter: document.querySelector("#screenLetter"),
+    final: document.querySelector("#screenFinal")
+};
+
+const fireworksLayer = document.querySelector("#fireworks");
+const dateButton = document.querySelector("#yesButton");
+const agreeButton = document.querySelector("#agreeButton");
+const anticipation = document.querySelector("#anticipation");
+const noButton = document.querySelector("#noButton");
+const noMessage = document.querySelector("#noMessage");
+
+let dateSelected = false;
+let selectedTime = null;
+let letterTimer;
+
+function showScreen(screen) {
+    Object.values(screens).forEach(item => {
+        if (item) item.classList.toggle("active", item === screen);
+    });
+}
+
+// 1. Клик по первой кнопке "Да ♡" (Запускает припев и салют)
+if (dateButton) {
+    dateButton.addEventListener("click", () => {
+        // Включаем Челентано
+        const audio = document.querySelector("#bgMusic");
+        if (audio) {
+            audio.volume = 0.4; // Комфортная громкость
+            audio.currentTime = 110; // Перемотка на припев (1:50)
+            audio.play().catch(e => console.log("Браузер заблокировал звук:", e));
+        }
+
+        // Включаем салют
+        if (typeof moveFireworks === "function") moveFireworks();
+        
+        // Открываем экран выбора даты
+        showScreen(screens.date);
+    });
+}
+
+// 2. Функция отправки сообщения в Telegram
+function sendTelegramMessage(text) {
+    const url = `https://telegram.org{BOT_TOKEN}/sendMessage`;
+    
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: text
+        })
+    })
+    .then(response => console.log("Отправлено в TG:", response.ok))
+    .catch(error => console.error("Ошибка отправки в TG:", error));
+}
+// 2. Функция отправки сообщения в Telegram
+function sendTelegramMessage(text) {
+    // Вставляем адрес и твои ID напрямую, чтобы кавычки не путались
+    const url = "https://telegram.org";
+    
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            chat_id: "5257725677",
+            text: text
+        })
+    })
+    .then(response => console.log("Отправлено в TG:", response.ok))
+    .catch(error => console.error("Ошибка отправки в TG:", error));
+}
+
+// 3. Функция, которая создает кнопки времени сразу
+function generateTimeButtons() {
+    const dayTimes = document.querySelector("#dayTimes");
+    const eveningTimes = document.querySelector("#eveningTimes");
+    
+    if (dayTimes && eveningTimes) {
+        dayTimes.innerHTML = `
+            <button class="time-button">12:00</button>
+            <button class="time-button">14:00</button>
+            <button class="time-button">16:00</button>
+        `;
+        eveningTimes.innerHTML = `
+            <button class="time-button">18:00</button>
+            <button class="time-button">20:00</button>
+            <button class="time-button">22:00</button>
+        `;
+        
+        dayTimes.style.display = "block";
+        eveningTimes.style.display = "block";
+        
+        document.querySelectorAll(".time-button").forEach(timeBtn => {
+            timeBtn.addEventListener("click", (event) => {
+                document.querySelectorAll(".time-button").forEach(b => b.classList.remove("selected"));
+                event.currentTarget.classList.add("selected");
+                selectedTime = event.currentTarget.textContent;
+                
+                const agreeBtn = document.querySelector("#agreeButton");
+                if (agreeBtn) agreeBtn.removeAttribute("disabled");
+            });
+        });
+    }
+}
+
+// Запускаем создание кнопок времени сразу при старте скрипта
+generateTimeButtons();
+
+// Логика выбора дня (просто подсвечивает число)
+document.querySelectorAll(".date-button").forEach(button => {
+    button.addEventListener("click", (e) => {
+        document.querySelectorAll(".date-button").forEach(b => b.classList.remove("selected"));
+        e.currentTarget.classList.add("selected");
+        dateSelected = true;
+    });
+});
+
+// Выбор конкретного часа
+document.querySelectorAll(".time-button").forEach(button => {
+    button.addEventListener("click", (e) => {
+        document.querySelectorAll(".time-button").forEach(b => b.classList.remove("selected"));
+        e.currentTarget.classList.add("selected");
+        selectedTime = e.currentTarget.textContent;
+    });
+});
+
+// 3. Клик по второй кнопке "Договорились" (Отправляет время в бот)
+if (agreeButton) {
+    agreeButton.addEventListener("click", () => {
+        showScreen(screens.letter);
+        
+        // Отправка уведомления
+        sendTelegramMessage("❤️ Она согласилась на свидание! Время: $");
+
+        window.clearTimeout(letterTimer);
+        letterTimer = window.setTimeout(() => {
+            showScreen(screens.final);
+        }, 2500);
+    });
+}
+
+// 4. Клик по кнопке "Повторить"
+const replayButton = document.querySelector("#replayButton");
+if (replayButton) {
+    replayButton.addEventListener("click", () => {
+        showScreen(screens.invite);
+        dateSelected = false;
+        selectedTime = null;
+        
+        // Выключаем музыку при сбросе
+        const audio = document.querySelector("#bgMusic");
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 110;
+        }
+    });
+}
+
+// 5. Поведение кнопки "Нет" (Беглянка)
+if (noButton) {
+    noButton.addEventListener("mouseenter", () => {
+        const x = Math.random() * (window.innerWidth - noButton.offsetWidth);
+        const y = Math.random() * (window.innerHeight - noButton.offsetHeight);
+        noButton.style.position = "absolute";
+        noButton.style.left = `${x}px`;
+        noButton.style.top = `${y}px`;
+    });
+}
+  </script>
+</body>
+</html>
